@@ -1,0 +1,401 @@
+## Git笔记
+
+### Git安装
+sudo apt-get install git
+
+#### 设置名字和邮箱地址
+git config --global user.name "sun"
+git config --global user.email "635976605@qq.com"
+
+
+
+### Git操作
+
+#### 创建版本库
+
+1. mkdir learngit  创建版本库
+2. cd learngit  进入文件夹
+3. git init 把目录变成Git可以管理的仓库
+4. vim a.txt  编写一个文件
+5. git add a.txt  把文件添加到仓库(<font color="red">add可反复多次使用，添加多个文件</font>)
+6. git commit -m "<font color="red">提交的说明</font>"  把文件提交到仓库
+
+小结：
+
+- 初始化一个Git仓库，使用git init命令。
+
+- 添加文件到Git仓库，分两步：
+
+  ​		git add (文件名)，可以反复多次使用没添加多个文件。
+
+  ​		git commit -m "提交说明"，完成提交。
+
+
+
+#### 时光穿梭机
+
+1. git status 查看工作区和暂存区文件的状态(<font color="red">在添加提交之前查看</font>)
+2. git diff  查看文件修改的记录
+
+小结：
+
+- 要随时掌握工作区的状态，使用git status命令。
+
+- 如果git status反馈文件被修改过，用git diff可以查看修改的内容
+
+
+
+#### 版本回退
+
+1. git log 查看最近到最远的提交日志 版本
+2. git log --pretty=oneline 显示内容比git log 简化了
+3. git reset --hard HEAD^ 回退到上一个版本
+4. cat woo.txt  查看文件的内容，此时已经回到了上一个版本
+5. git reset --hard 468ec(版本号id前几位)  此命令制定回到了未来的某个版本
+6. cat woo.txt 再次查看文件内容，发现内容回到了468ec版本
+7. git reflog 查看命令历史
+
+小结：
+
+- HEAD指向的版本就是当前版本，因此，Git允许我们在版本的历史之间穿梭，使用命令git reset --hard (版本号id前几位)。
+
+- 穿梭前，用git log可以查看提交历史，以便要回退到哪个版本。
+
+- 要重返未来，用git reflog 查看命令历史，以变要回到未来的哪个版本。
+
+
+
+####　工作区和暂存区
+
+- 工作区有一个隐藏目录.git，这个不算工作区，而是Git的版本库。版本库里存了很多东西，其中最重要的就是称为stage的暂存区，还有Git为我们自动创建的第一个分之master，以及只想master的一个指针叫HEAD。
+
+- 之前使用git add把文件添加进去，实际上就是把文件修改到暂存区，再用git commit "提交说明"提交更改，实际上就是把暂存区的所有内容提交到当前分支
+
+1. vim woo.txt 先对woo.txt文件进行修改
+2. vim license.txt 然后在工作区新增一个license.txt文件
+3. git status 查看一下状态，此时反馈回来的是woo文件被修改了，而license从来没有被添加过
+4. git add 把两个文件都添加后
+5. git satus 再次查看状态，此时反馈一个新文件和被修改的文件
+6. git commit -m "提交说明"  提交这两个文件
+
+- 所以使用add命令实际上就是把要提交的所有修改放到暂存区，然后执行git commit就可以一次性把暂存区的所有修改提交到分支。
+
+- 一旦提交后，在用git satus查看，如果没有对工作区做任何修改，那么工作区就是干净的
+
+
+
+#### 管理修改
+
+1. vim woo.txt 先对文件进行修改
+2. git add woo.txt 然后添加
+3. vim woo.txt 再修改文件
+4. git commit -m "提交说明"  执行提交
+5. git status  提交后查看状态，此时第二次修改并没有被提交
+6. git diff HEAD -- woo.txt 可以查看工作区和版本库里面最新版本的区别
+7. git add woo.txt 添加第二次的修改
+8. git commit -m "提交说明" 提交第二次的修改
+
+第一次修改->git add -> 第二次修改 ->git add ->git commit
+
+每次修改，如果不用git add到暂存区，那就不会加入到commit中
+
+
+
+#### 撤销修改
+
+- 没有放到暂存区的
+
+1. vim woo.txt 修改文本添加一行内容
+2. git status 查看一下状态 此时Git会反馈可以使用git checkkout -- 文件名 来丢弃工作区的修改
+3. git checkout -- woo.txt 把文件在工作的修改全部撤销
+4. git status 再次查看文件的状态，此时的内容复原了
+
+git checkout -- 文件名  命令中的--很重要，没有--，旧变成了 切换到另一个分之 的命令，我们在后面的分支管理中会再次遇到git checkout命令
+
+- 放到暂存区的
+
+1. vim woo.txt 为文本添加一行内容
+2. git add woo.txt 添加到暂存区
+3. git status 查看一下状态 此时Git提示可以使用git reset HEAD 文件名 可以把暂存区的修改撤销掉，重新放回到工作区 
+4. git reset HEAD woo.txt 把文件从暂存区撤回到工作区
+5. git status 在查看一下状态 此时暂存区是干净的，工作区有修改
+6. git checkout -- woo.txt 把文件在工作区的修改全部撤销
+
+小结：
+
+- 场景1：当改乱工作区某个文件的内容，想直接丢弃工作区的修改是，用命令git checkout -- 文件名
+
+- 场景2：当不但改乱了工作区某个文件的内容，还添加到了暂存区时，想丢弃修改，分两步，第一步用命令git reset HEAD 文件名，就回到了场景1，第二部按场景1操作
+
+- 场景3：已经提交了不合适的修改到版本库时，想要撤销本次提交，参考版本回退一节，不过前提时没有推送到远程库
+
+
+
+#### 删除文件
+
+1. vim test.txt -> git add test.txt -> git commit -m "ss"  先新建个文本并添加到库
+
+2. rm test.txt 用rm命令删除
+
+3. git status 查看状态，此时反馈文件被删除了
+
+   两种情况：4、5删除   6还原
+
+4. git rm test.txt 从版本库删除该文件
+5. git commit -m "shan"  执行删除
+6. git checkout -- test.txt  恢复删除的文件
+
+小结：
+
+命令git rm 用于删除一个文件，如果一个文件已经被提交到版本库，那么永远不用担心误删，但要小心，只能恢复文件到最新版本，会丢失最近一次提交后修改的内容
+
+
+
+#### 远程仓库
+
+ssh-keygen -t rsa -C "635976605@qq.com"  创建SSH密钥
+
+然后一路回车，使用默认值即可
+
+1. 在用户目录里找到.ssh目录，里面有id_rsa和id_rsa.pub两个文件，这两个就是SSH Key的密钥对，id_rsa是私钥，id_rsa_pub是公钥
+2. cd .ssh  -> ls -> id_rsa.pub  查看密钥内容
+3. 登录GitHub，打开"Account settings"，"SSH Keys"页面，然后点"Add SSH Kye",填上任意标题，在Key文本框里粘贴id_rsa.pub文件的内容
+
+
+
+#### 添加远程仓库
+
+1. 登录GitHub，在网页上创建一个新的仓库
+
+2. 在Repository name填入learngit，其他保持默认设置，点击创建按钮，就成功的创建了一个新的Git仓库
+
+3. 在本地的learngit仓库下运行命令：
+
+   git remote add origin https://github.com/sunbaishu/learngit.git 
+
+4. git push -u origin master 把本地库有的所有内容推送到远程库上
+
+5. 从现在起，只要本地做了提交，就可以通过命令：
+
+   git push origin master
+
+
+
+#### 从远程库克隆
+
+1. 现在GitHub网站创建一个新的仓库，名字gitskills，并勾选Initialize this repository with a README，这样GitHub会自动为我们创建一个README.md文件，创建完毕后，可以看到README.md文件
+
+2. cd 返回到首层
+
+3. git clone https://github.com/sunbaishu/gitskills.git 把远程的文件克隆到本地库
+
+4. cd gitskills -> ls  此时已经能看到本地库的README.md文件了
+
+
+
+#### 分支管理
+
+#### 创建与合并分支
+
+一开始的时候，`master`分支是一条线，Git用`master`指向最新的提交，再用`HEAD`指向`master`，就能确定当前分支，以及当前分支的提交点：
+
+![](https://www.liaoxuefeng.com/files/attachments/919022325462368/0)
+
+1. git checkout -b dev 创建并切换到dev分支，命令上加上-b参数表示创建并切换，相当于(git branch dev -> git checkout dev)
+2. git branch 查看当前分支，此命令会列出所有分支，当前分支前会标一个*号
+3. vim woo.txt -> git add woo.txt -> git commit -m "提示说明"  对一个文件进行修改添加
+4. git checkout master 切换回master分支
+5. cat woo.txt 查看文件发现刚才添加的内容并没有，因为那个提交是在dev分支上，此刻master分支的提交点并没有改变
+6. git merge dev 把dev分支的工作成果合并到master分支上
+7. cat woo.txt 再次查看文件就会看见提交的内容了
+8. git branch -d dev 合并完成后，删除dev分支
+9. git branch 再次查看分支，就只剩下master分支了
+
+
+
+switch(<font color="red">最新版本Git</font>)  使用新的 git switch命令，比git checkout更容易理解
+
+git switch -c dev 创建并且换到新的dev分支
+
+git switch master 直接切换到已有的master分支
+
+
+
+#### 解决冲突
+
+1. git checkout -b feature1 创建并切换到新的feature1分支
+2. vim.woo.txt -> git add woo.txt -> git commit -m "提交说明"  为文本最后一行添加一条内容，在feature1分支上提交
+3. git checkout master  切换到master分支
+4. 在master分支上为woo文件最后一行添加一条内容并提交
+5. git merge feature1  把feature1分支的内容合并到master分支上，这个情况下，Git无法执行快速合并，只能试图把各自的修改合并起来，但这种合并可能会有冲突。冲突必须手动解决冲突后再提交。
+6. git status 查看状态，可以告诉我们冲突的文件
+7. 修改冲突后在进行添加并提交(add  commit)
+8. git branch -d feature1  最后删除feature1分支
+
+小结：
+
+- 当Git无法自动合并分支时，就必须首先解决冲突。解决冲突后，再提交，合并完成。
+
+- 解决冲突就是把Git合并失败的文件手动编辑为我们希望的内容，再提交
+- 用git log --graph命令可以看到分支合并图
+
+
+
+#### 分支管理策略
+
+1. git checkout -b dev 创建并切换到dev分支
+2. 修改woo文件并添加提交
+3. git checkout master 切换回master分支
+4. git merge --no-ff -m "提交说明" dev  合并dev分支，--no-ff参数表示禁用Fast forward，本次合并要创建一个新的commit，所以加上-m参数，把commit描述写进去
+
+小结：
+
+- Git分支十分强大，在团队开发中应该充分应用
+- 合并分支时。介绍--no-ff参数就可以用普通模式合并，合并后的历史有分支，能看出来曾经做过合并，而fast forward合并就看不出来曾经做过合并
+
+
+
+#### Bug分支
+
+假如接到一个bug的任务时，想创建一个分支issue-101来修复它，但是当前正在dev上进行的工作还没有提交
+
+1. git stash 把当前工作内容储藏起来
+2. git status 查看工作区，此时是干净的工作区
+3. git checkout master 回到主分支上
+4. git checkout -b issue-101  创建101临时分支，在101分支上修复bug，再执行添加提交(此时提交文件会生成版本号，记住它，后边用的到)
+5. git checkout master 切换到主分支上
+6. git merge --no-f -m "bug" issue-101   把101分支上修复的bug合并到主分支上
+7. git branch -d issue-101  删除101分支
+8. git checkout dev  回到dev分支上继续工作
+9. git status 查看一下状态，此时是干净的，因为之前储藏起来了
+10. git stash list  使用查看一下(此命令可以多次使用)
+11. git stash pop  把文件恢复同时删除stash
+12. vim woo.txt  进入文件(继续工作)，发现在dev分支下文件里边的bug并没有修复
+13. cherry-pick (版本号) 复制一个特定的提交到当前分支
+
+小结：
+
+- 修复bug时，会通过创建新的bug分支进行修复，然后合并，最后删除
+- 当手头工作没有完成时，先把工作现场git stash一下，然后去修复bug，修复后，再git stash pop，回到工作现场
+- 在master分支上修复的bug，想要合并到当前dev分支，可以用git cherry-pick (版本号)命令，把bug提交的修改"复制"到当前分支，避免重复劳动
+
+
+
+#### Feature分支 强制删除分支 -D
+
+1. git checkout -b feature  创建并切换到feature分支
+
+2. vim haha.txt  创建新文件写新功能
+
+3. git add haha.txt  添加到本地库
+
+4. git commit -m "提交说明"  提交到本地库
+
+5. git checkout dev 切换回dev分支
+
+6. git branch -d feature  删除feature分支，此时无法删除，因为没有完全合并，feature分支上还有文件，但这个文件不需要了
+
+7. git branch -D feature  强行删除
+
+小结：
+
+如果要丢弃一个没有被合并过的分支，可以通过git branch -D (分支名)强行删除
+
+
+
+#### 多人协作
+
+1. git remote 查看远程库信息
+2. git remote -v  查看远程库信息，加-v参数显示更详细的信息
+3. git clone git@github.com:sunbaishu/sun.git  使用另一台电脑或同一台电脑的另一个目录下克隆
+4. git branch  查看分支，当别人从远程库clone时，默认情况只能看到本地的master分支
+5. git checkout -b origin/dev  要在dev分支上开发，创建远程origin的dev分支到本地
+6. vim a.txt -> git add a.txt -> git commit -m "提交说明"  在dev分支上做文件修改添加提交
+7. git push origin dev  把dev分支推送到远程上
+8. 本地电脑对文件进行 修改 添加 提交
+9. git push orign dev 推送到远程库，此时发现有冲突
+10. git pull 把另一电脑推送的文件(origin/dev)抓下来，然后在本地合并，解决冲突，再推送
+11. git branch --set-upstream-to=origin/dev dev  将本地dev分支与远程origin/dev分支链接，因为前边git pull也失败了，原因就是两者没有链接
+12. git pull 再pull，这回就成功了，但是合并有冲突，需要手动解决
+13. 再添加提交，然后再推送到远程
+
+小结：
+
+- 查看远程库信息，使用git remote -v
+- 本地新建的分支如果不推送到远程，对其他人就是不可见的
+- 从本地推送分支，使用git push origin (分支名)，如果推送失败，先用git pull抓取远程的新提交
+- 在本地创建和远程分支对应的分支，使用git checkout -b (分支名) origin/(分支名)，本地和远程分支的名称最好一致
+- 建立本地分支和远程分支的关联，使用git branch --set-upstream (分支名) origin/(分支名)
+- 从远程抓取分支，使用git pull，如果有冲突，要先处理冲突
+
+
+
+#### Rebase
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#### 常用命令
+
+开始一个工作区
+命令|执行结果
+---|----
+clone|克隆一个仓库到一个新目录
+init|创建一个空的Git仓库或重新初始化一个已存在的仓库
+
+在当前变更上工作
+命令|执行结果
+--|--
+add|添加文件内容至索引
+mv|移动或重命名一个文件、目录或符号链接
+reser|充值当前HEAD到制定状态
+rm|从工作区和索引中删除文件
+
+检查历史和状态
+命令|执行结果
+--|--
+bisect|通过二分查找定位引入bug的提交
+grep|输出和模式匹配的行
+log|显示提交日志
+show|显示各种类型的对象
+status|显示工作区状态
+
+扩展、标记和调校您的历史记录
+命令|执行结果
+--|--
+branch|列出、创建或删除分支
+checkout|切换分之或恢复工作区文件
+commit|记录变更到仓库
+diff|显示提交之间、提交和工作区之间等的差异
+merge|和人名两个或更多开发历史
+rebase|在另一个分之上重新应用提交
+tag|创建、列出、删除或校验一个GPG签名的标签对象
+
+协同
+命令|执行结果
+--|--
+fetch|从另外一个仓库下载对象和引用
+pull|获取并整合另外的仓库或一个本地分支
+push|更新远程引用和相关的对象
+
