@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "tree 命令"
+title: "Linux tree 命令"
 date: 2019-11-13
 description: "tree 命令"
 tag: Linux
